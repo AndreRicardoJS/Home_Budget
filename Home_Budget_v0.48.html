@@ -1,0 +1,1985 @@
+<!DOCTYPE html>
+<!-- 
+ * Home Budget v0.48 (Última Atualização: 27/12/2024)
+ *
+ * Descrição: O Home Budget é um software livre criado para simplificar o gerenciamento
+ * financeiro doméstico. Ele permite que você controle suas receitas e despesas de forma
+ * eficiente, oferecendo ferramentas básicas para organizar seu orçamento e acompanhar 
+ * sua saúde financeira. Ideal para quem busca uma solução acessível e funcional, 
+ * o Home Budget é um projeto em evolução contínua, sempre aberto a melhorias.
+ * 
+ * Filosofia: O Home Budget segue a essência do software livre, sendo inteiramente aberto
+ * e transparente. Todo o código está contido em um único arquivo HTML, sem bibliotecas
+ * externas, propagandas ou coleta de dados. Cada linha de código está acessível para que
+ * o usuário entenda, modifique e adapte às suas necessidades, reforçando a ideia de que
+ * tecnologia deve servir às pessoas, e não o contrário.
+ * 
+ * Status: Em estágio inicial de desenvolvimento, o software pode apresentar pequenas
+ * falhas e carece de adaptação para dispositivos móveis, mas já proporciona uma base 
+ * sólida para controle financeiro em desktops.
+ * 
+ * Licença: GNU GPLv3 - Consulte https://www.gnu.org/licenses/gpl-3.0.html para detalhes.
+ * 
+ * Autor: André Ricardo
+ * 
+ * Contato:
+ * - Grupo: https://t.me/Home_Budget
+ * - Pessoal: https://t.me/andre_ricardo
+ * 
+ * Importante: O uso deste software é por sua conta e risco. Recomendamos exportar seus 
+ * dados regularmente para evitar perdas e garantir a segurança das suas informações.
+-->
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamento Doméstico</title>
+
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Configuração básica do corpo */
+        body {
+            font-family: Arial, sans-serif;
+            color: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+
+        /* Cabeçalho */
+        header {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Navbar principal */
+        .nav-bar {
+            display: flex;
+            justify-content: space-evenly;
+            /* Espaçamento uniforme entre os links */
+            align-items: center;
+            background-color: #f0f0f0;
+            /* Cor de fundo */
+            padding: 10px;
+            /* Espaçamento interno */
+            border-radius: 8px;
+            width: 100%;
+            /* Ocupa toda a largura disponível */
+            max-width: 100%;
+            /* Remove limite de largura */
+            margin: 0 auto;
+            /* Centraliza horizontalmente */
+            z-index: 1000;
+            /* Garante que fique acima de outros elementos */
+        }
+
+        /* Links da navbar */
+        .nav-bar a {
+            text-decoration: none;
+            /* Remove sublinhado */
+            color: #000;
+            /* Cor do texto */
+            padding: 10px 20px;
+            /* Espaçamento interno nos links */
+            border-radius: 4px;
+            /* Bordas arredondadas */
+            transition: background-color 0.3s ease, color 0.3s ease;
+            /* Animação suave para background e cor */
+            text-align: center;
+            /* Centraliza o texto */
+        }
+
+        /* Cor de fundo ao passar o mouse */
+        .nav-bar a:hover {
+            background-color: #ddd;
+        }
+
+        /* Botão de menu (somente em telas pequenas) */
+        .menu-toggle {
+            display: none;
+            /* Ocultar por padrão */
+        }
+
+        /* Estilo para telas grandes */
+        @media (min-width: 769px) {
+            .nav-bar {
+                /* Navbar visível e com largura padrão */
+                flex-direction: row;
+                /* Alinha itens horizontalmente */
+                justify-content: space-evenly;
+                width: 50%;
+                /* A largura da navbar ocupa toda a tela */
+                padding: 10px;
+                /* Padroniza o espaçamento interno */
+            }
+
+            .nav-bar a {
+                width: auto;
+                /* Largura automática para links */
+                font-size: 1rem;
+                /* Tamanho de fonte normal */
+            }
+        }
+
+        /* Estilo para telas pequenas */
+        @media (max-width: 768px) {
+
+            /* Exibir o botão de menu */
+            .menu-toggle {
+                display: block;
+                margin: 0 auto;
+                background-color: #f0f0f0;
+                /* Cor de fundo do botão */
+                color: #000;
+                /* Cor do texto */
+                padding: 10px;
+                font-size: 18px;
+                border: none;
+                cursor: pointer;
+                width: 50%;
+                /* Ocupa toda a largura */
+                text-align: center;
+            }
+
+            .menu-toggle:focus {
+                outline: none;
+                /* Remove o contorno padrão */
+            }
+
+            /* Navbar oculta por padrão */
+            .nav-bar {
+                visibility: hidden;
+                opacity: 0;
+                flex-direction: column;
+                /* Alinha itens verticalmente */
+                position: fixed;
+                /* Ocupa toda a tela */
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: #f0f0f0;
+                /* Cor de fundo */
+                align-items: center;
+                /* Centraliza horizontalmente */
+                justify-content: center;
+                /* Centraliza verticalmente */
+                gap: 20px;
+                /* Espaçamento entre os links */
+                transition: visibility 0.3s, opacity 0.3s ease-in-out;
+            }
+
+            /* Navbar visível quando ativa */
+            .nav-bar.active {
+                visibility: visible;
+                opacity: 1;
+            }
+
+            .nav-bar a {
+                width: 100%;
+                /* Links ocupam toda a largura */
+                font-size: 1.2rem;
+                /* Texto maior para melhor usabilidade */
+            }
+
+            .nav-bar a:hover {
+                background-color: #ddd;
+                /* Cor de fundo ao passar o mouse */
+                border-radius: 5px;
+            }
+        }
+
+        /* Alinhar todos os H ao centro */
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            text-align: center;
+        }
+
+        /* Centralizar o botão "Adicionar Transação" na tela inicial */
+        #formTransacao .text-center {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+            /* Espaçamento superior opcional */
+        }
+
+        /* Centralizar o botão "Buscar" na tela de busca */
+        #formBusca {
+            display: flex;
+            flex-direction: column;
+            /* Mantém os elementos em coluna */
+            align-items: center;
+            /* Centraliza todos os elementos do formulário horizontalmente */
+            gap: 10px;
+            /* Espaçamento entre os elementos */
+        }
+
+        label,
+        input,
+        select {
+            display: inline-block;
+            /* Organiza os elementos lado a lado */
+            /* text-align: left; */
+            /* Alinhamento do texto */
+            /* margin-bottom: 10px; */
+            /* Espaçamento entre as linhas */
+        }
+
+        /* Ajuste do tamanho dos inputs */
+        input[type="number"] {
+            width: 200px;
+            /* Define largura padrão para os inputs */
+        }
+
+        input[type="text"] {
+            width: 200px;
+            /* Define largura padrão para os inputs */
+        }
+
+        input[type="date"] {
+            width: 155px;
+            /* Define largura padrão para os inputs */
+        }
+
+        select {
+            width: 200px;
+            /* Define largura padrão para os inputs */
+        }
+
+        .descricao-input {
+            width: 300px;
+            /* Largura específica para o input de descrição */
+        }
+
+        .container {
+            display: flex;
+            /* Torna o layout flexível */
+            flex-direction: column;
+            /* Alinha os itens verticalmente */
+            align-items: flex-end;
+            /* Alinha tudo à direita */
+            /* gap: 10px; */
+            /* Espaçamento entre linhas */
+            /* margin-right: 20px; */
+            /* Adiciona um espaçamento opcional à direita */
+        }
+
+        /* Cada linha de label e input */
+        .form-group {
+            display: flex;
+            /* Alinha o label e o input na mesma linha */
+            align-items: center;
+            /* Centraliza verticalmente o conteúdo */
+            /* gap: 10px; */
+            /* Espaçamento entre o label e o input */
+        }
+
+        .form-group label {
+            margin-right: 5px;
+        }
+
+        .form-inline {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            /* Espaço entre label e input */
+        }
+
+
+        /* Formulários e inputs */
+        input,
+        select,
+        button {
+            font: inherit;
+            margin: 5px 0;
+            padding: 5px;
+        }
+
+        /* Estrutura para grupos input date */
+        .input-grupo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Tabelas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 5px;
+            text-align: center;
+        }
+
+        /* Paginação */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+
+        /* Ocultar elementos */
+        .hidden {
+            display: none;
+        }
+
+        #sobre-container {
+            margin: 0 auto;
+            /* Centraliza o conteúdo horizontalmente */
+            max-width: 600px;
+            /* Limita a largura máxima do texto */
+            padding: 0 16px;
+            /* Adiciona um pequeno espaçamento interno */
+            text-align: justify;
+        }
+
+        #licenca-container {
+            margin: 0 auto;
+            /* Centraliza o conteúdo horizontalmente */
+            max-width: 600px;
+            /* Limita a largura máxima do texto */
+            padding: 0 16px;
+            /* Adiciona um pequeno espaçamento interno */
+            text-align: justify;
+        }
+
+        .margin-tipo {
+            margin-right: 25px;
+        }
+
+        /* Centraliza os elementos da label e radios na tela de início */
+        #formTransacao .form-group {
+            display: flex;
+            align-items: center;
+            justify-content: right;
+            /* Alinha os itens no centro horizontalmente */
+            gap: 0px;
+            /* Adiciona espaçamento entre label e input */
+        }
+
+        /* Ajuste específico para as labels dos radios */
+        #formTransacao .form-group label {
+            margin-right: 10px;
+            /* Ajusta o espaçamento da label para os radios */
+            text-align: center;
+            /* Garante que a label também seja centralizada */
+        }
+
+        /* Se houver a necessidade de personalizar os radios individualmente */
+        #formTransacao .form-group input[type="radio"] {
+            margin-right: 0px;
+            /* Se quiser adicionar um espaçamento extra entre os radios */
+        }
+
+        /* Classe para ajustar o espaçamento entre os botões de rádio */
+        .radio-spacing {
+            display: flex;
+            flex-direction: row;
+            /* Alinha os botões verticalmente */
+            gap: 20px;
+            /* Define o espaçamento entre os botões */
+        }
+
+        /* Contêiner para os cartões */
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            /* Espaçamento entre os cartões */
+            justify-content: center;
+        }
+
+        /* ----- CARDS ----- */
+        /* Estilo do cartão */
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            width: 100%;
+            /* Largura completa em telas pequenas */
+            max-width: 300px;
+            /* Limite máximo para telas maiores */
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Inputs nos cartões */
+        .card input,
+        .card select {
+            width: 100%;
+            margin-top: 5px;
+            padding: 5px;
+            box-sizing: border-box;
+        }
+
+        /* Estilos para a tabela */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: left;
+        }
+
+        /* Botão de Editar */
+        .edit-btn {
+            background-color: #2b6cb0;
+            /* Azul Escuro */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Botão de Salvar */
+        .save-btn {
+            background-color: #2f855a;
+            /* Verde Escuro */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            /* Inicialmente oculto */
+        }
+
+        /* Botão de Cancelar */
+        .cancel-btn {
+            background-color: #c53030;
+            /* Vermelho Escuro */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            /* Inicialmente oculto */
+        }
+
+        /* Botão de Excluir */
+        .delete-btn {
+            background-color: #742a2a;
+            /* Bordô Escuro */
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+
+            table,
+            thead,
+            tbody,
+            th,
+            td,
+            tr {
+                display: block;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                text-align: right;
+            }
+
+            th::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: bold;
+            }
+
+            td::before {
+                content: attr(data-label);
+                float: left;
+                font-weight: bold;
+            }
+
+            .edit-btn,
+            .save-btn,
+            .cancel-btn {
+                display: inline-block;
+                margin-top: 10px;
+            }
+        }
+    </style>
+
+    <script>
+
+        // Aguarda o carregamento completo do DOM antes de executar o código
+        document.addEventListener('DOMContentLoaded', closeMenuOnLinkClick);
+        document.addEventListener('DOMContentLoaded', function () {
+            // Exibe a tela inicial ao carregar a página
+            switchContainer('inicio-container');
+
+            // Adiciona eventos para atualizar categorias ao mudar a seleção de "Entrada" ou "Saída" na busca avançada
+            document.getElementById('buscaEntrada').addEventListener('change', atualizarCategorias);
+            document.getElementById('buscaSaida').addEventListener('change', atualizarCategorias);
+
+            // Define a opção "Saída" como selecionada por padrão na tela inicial
+            document.getElementById('saida').checked = true;
+            updateCategoryOptions(); // Atualiza as opções de categorias de acordo com a seleção inicial ("Saída")
+
+            // Sincroniza a data de fim com a data de início em diferentes telas
+            sincronizarDataInicioFim('buscaDataInicio', 'buscaDataFim');      // Tela de busca avançada
+            sincronizarDataInicioFim('filterDataInicio', 'filterDataFim');    // Tela de registros de transações
+            sincronizarDataInicioFim('relatorioDataInicio', 'relatorioDataFim'); // Tela de geração de relatórios
+        });
+
+        // Alterna a visibilidade entre seções da página, exibindo o container especificado
+        function switchContainer(containerId) {
+            const containers = document.querySelectorAll('main > section');
+            containers.forEach(container => container.style.display = 'none');
+            document.getElementById(containerId).style.display = 'block';
+        }
+
+        // MENU NAV
+        // Alterna o menu ao clicar no botão
+        function toggleMenu() {
+            const navBar = document.querySelector('.nav-bar');
+            navBar.classList.toggle('active');
+
+            // Impede rolagem do fundo quando o menu está ativo
+            document.body.style.overflow = navBar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        // Fecha o menu ao clicar em um link
+        function closeMenuOnLinkClick() {
+            const navBar = document.querySelector('.nav-bar');
+            const links = navBar.querySelectorAll('a');
+
+            links.forEach(link => {
+                link.addEventListener('click', () => {
+                    navBar.classList.remove('active');
+                    document.body.style.overflow = ''; // Restaura o scroll
+                });
+            });
+        }
+
+
+        // Variáveis
+        let db;
+        const request = indexedDB.open("financeDB", 1);
+        const transacoesPorPaginaRelatorios = 10;
+        const transacoesPorPaginaRegistros = 10;
+        let paginaAtual = 1;
+        let transacoes = [];
+        let registros = [];
+
+        request.onupgradeneeded = function (event) {
+            db = event.target.result;
+            const objectStore = db.createObjectStore("transacoes", { keyPath: "id", autoIncrement: true });
+            objectStore.createIndex("data", "data", { unique: false });
+            objectStore.createIndex("tipo", "tipo", { unique: false });
+            objectStore.createIndex("categoria", "categoria", { unique: false });
+            objectStore.createIndex("valor", "valor", { unique: false });
+            objectStore.createIndex("descricao", "descricao", { unique: false });
+        };
+
+        request.onsuccess = function (event) {
+            db = event.target.result;
+            atualizarResumo();
+        };
+
+        request.onerror = function (event) {
+            console.error("Erro ao abrir o banco de dados:", event.target.errorCode);
+        };
+
+        // Função para formatar datas
+        function formatarData(data) {
+            if (!data) return '';
+            return new Intl.DateTimeFormat('pt-BR').format(new Date(data));
+        }
+
+        // Função para formatar datas e horas
+        function formatarDataHora(data) {
+            if (!data) return '';
+            return new Intl.DateTimeFormat('pt-BR', {
+                dateStyle: 'short',
+                timeStyle: 'short'
+            }).format(new Date(data));
+        }
+
+        // Função para formatar números com duas casas decimais
+        function formatarNumero(numero) {
+            if (isNaN(numero)) return '0,00';
+            return new Intl.NumberFormat('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(numero);
+        }
+
+        // Função para formatar moedas em Real (BRL)
+        function formatarMoeda(valor) {
+            if (isNaN(valor)) return 'R$ 0,00';
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        // Função para sincronizar data de fim com data de início
+        function sincronizarDataInicioFim(idInicio, idFim) {
+            const campoInicio = document.getElementById(idInicio);
+            const campoFim = document.getElementById(idFim);
+
+            if (campoInicio && campoFim) {
+                campoInicio.addEventListener('change', function () {
+                    const dataInicio = campoInicio.value;
+                    if (dataInicio && !campoFim.value) {
+                        campoFim.value = dataInicio;
+                    }
+                });
+            }
+        }
+
+        // Adiciona uma nova transação ao banco IndexedDB após validar os dados
+        function adicionarTransacao() {
+            const data = document.getElementById("data").value;
+            const tipo = document.querySelector('input[name="tipo"]:checked').value;
+            const categoria = document.getElementById("categoria").value;
+            const valor = parseFloat(document.getElementById("valor").value);
+            const descricao = document.getElementById("descricao").value;
+
+            if (!data || isNaN(Date.parse(data))) {
+                alert("A data deve ser válida.");
+                return;
+            }
+
+            if (!categoria) {
+                alert("A categoria deve ser selecionada.");
+                return;
+            }
+
+            if (isNaN(valor) || valor <= 0) {
+                alert("O valor deve ser um número positivo.");
+                return;
+            }
+
+            const transaction = db.transaction(["transacoes"], "readwrite");
+            const objectStore = transaction.objectStore("transacoes");
+            const addRequest = objectStore.add({ data, tipo, categoria, valor, descricao });
+
+            addRequest.onsuccess = function () {
+                alert("Transação adicionada com sucesso!");
+                document.getElementById("formTransacao").reset();
+                document.getElementById("saida").checked = true;
+                updateCategoryOptions();
+                atualizarResumo();
+            };
+
+            addRequest.onerror = function (event) {
+                console.error("Erro ao adicionar a transação:", event.target.errorCode);
+            };
+        }
+
+        // Recupera e filtra transações do banco IndexedDB com base em um período específico
+        function exibirTransacoes(filtro, tipo) {
+            const transaction = db.transaction(["transacoes"], "readonly");
+            const objectStore = transaction.objectStore("transacoes");
+            transacoes = [];
+            const dataAtual = new Date();
+            let dataFiltroInicio = null; // Valor padrão para ignorar o filtro
+            let dataFiltroFim = null;   // Valor padrão para ignorar o filtro
+            const transacoesPorPagina = tipo === 'relatorios' ? transacoesPorPaginaRelatorios : transacoesPorPaginaRegistros;
+
+            // Configurar os filtros de data com base no tipo de filtro
+            if (filtro === '30') {
+                dataFiltroInicio = new Date(dataAtual.setDate(dataAtual.getDate() - 30)).toISOString().split('T')[0];
+            } else if (filtro === '90') {
+                dataFiltroInicio = new Date(dataAtual.setDate(dataAtual.getDate() - 90)).toISOString().split('T')[0];
+            } else if (filtro === 'filtro-personalizado') {
+                // Captura as datas diretamente dos inputs
+                dataFiltroInicio = document.getElementById("filterDataInicio").value || null;
+                dataFiltroFim = document.getElementById("filterDataFim").value || null;
+            }
+
+
+            const startTime = performance.now();
+
+            objectStore.openCursor().onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    // Se "Todos", incluir todos os registros. Caso contrário, aplicar o filtro
+                    if ((filtro === 'todos') ||
+                        ((!dataFiltroInicio || cursor.value.data >= dataFiltroInicio) &&
+                            (!dataFiltroFim || cursor.value.data <= dataFiltroFim))) {
+                        transacoes.push(cursor.value);
+                    }
+                    cursor.continue();
+                } else {
+                    const endTime = performance.now();
+                    const tempoConsulta = document.getElementById("tempoConsulta");
+                    const numRegistros = document.getElementById("numRegistros");
+                    if (tempoConsulta && numRegistros) {
+                        tempoConsulta.textContent = `Tempo da consulta: ${(endTime - startTime).toFixed(2)} ms`;
+                        numRegistros.textContent = `Número de registros recuperados: ${transacoes.length}`;
+                    }
+                    transacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+                    mostrarPagina(paginaAtual, tipo);
+                }
+            };
+        }
+
+        // Exibe as transações paginadas na tabela da tela de registros
+        function mostrarPagina(pagina, tipo) {
+            paginaAtual = pagina;
+            const formatter = new Intl.NumberFormat('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const dateFormatter = new Intl.DateTimeFormat('pt-br');
+            const transacoesPorPagina = tipo === 'relatorios' ? transacoesPorPaginaRelatorios : transacoesPorPaginaRegistros;
+            const inicio = (paginaAtual - 1) * transacoesPorPagina;
+            const fim = paginaAtual * transacoesPorPagina;
+            const transacoesPagina = transacoes.slice(inicio, fim);
+
+            let tabelaHTML = `<table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Categoria</th>
+                <th>Valor</th>
+                <th>Descrição</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+            transacoesPagina.forEach(item => {
+                tabelaHTML += `<tr id="row-${item.id}">
+            <td id="data-${item.id}">${formatarData(item.data)}</td>
+            <td id="tipo-${item.id}">${item.tipo}</td>
+            <td id="categoria-${item.id}">${item.categoria}</td>
+            <td id="valor-${item.id}">${formatter.format(item.valor)}</td>
+            <td id="descricao-${item.id}">${item.descricao}</td>
+            <td style="display: flex; gap: 8px;">
+                <button onclick="editarTransacao(${item.id})" class="edit-btn">Editar</button>
+                <button onclick="salvarTransacao(${item.id})" class="save-btn">Salvar</button>
+                <button onclick="cancelarEdicao(${item.id})" class="cancel-btn">Cancelar</button>
+                <button onclick="excluirTransacao(${item.id})" class="delete-btn">Excluir</button>
+            </td>
+
+        </tr>`;
+            });
+
+            tabelaHTML += `</tbody></table>`;
+            document.getElementById("tabelaTransacoes").innerHTML = tabelaHTML;
+            document.getElementById("tabelaTransacoes").style.display = "block";
+            atualizarPaginacao(tipo);
+        }
+
+
+        // Atualiza os controles de paginação com base no número total de transações
+        function atualizarPaginacao(tipo) {
+            const transacoesPorPagina = tipo === 'relatorios' ? transacoesPorPaginaRelatorios : transacoesPorPaginaRegistros;
+            const totalPaginas = Math.ceil(transacoes.length / transacoesPorPagina);
+            let paginacaoHTML = '';
+
+            if (totalPaginas > 1) {
+                paginacaoHTML += `<button onclick="mostrarPagina(1, '${tipo}'); exibirTransacoes('todos', '${tipo}');" ${paginaAtual === 1 ? 'disabled' : ''}>Primeira</button>`;
+                paginacaoHTML += `<button onclick="mostrarPagina(${paginaAtual - 1}, '${tipo}'); exibirTransacoes('todos', '${tipo}');" ${paginaAtual === 1 ? 'disabled' : ''}>&laquo; Anterior</button>`;
+                paginacaoHTML += `<span>Página ${paginaAtual} de ${totalPaginas}</span>`;
+                paginacaoHTML += `<button onclick="mostrarPagina(${paginaAtual + 1}, '${tipo}'); exibirTransacoes('todos', '${tipo}');" ${paginaAtual === totalPaginas ? 'disabled' : ''}>Próxima &raquo;</button>`;
+                paginacaoHTML += `<button onclick="mostrarPagina(${totalPaginas}, '${tipo}'); exibirTransacoes('todos', '${tipo}');" ${paginaAtual === totalPaginas ? 'disabled' : ''}>Última</button>`;
+            }
+
+            const paginacaoElement = tipo === 'relatorios' ? document.getElementById("paginacaoRelatorio") : document.getElementById("paginacao");
+            paginacaoElement.innerHTML = paginacaoHTML;
+            paginacaoElement.style.display = totalPaginas <= 1 ? "none" : "flex";
+        }
+
+        // Gera dinamicamente as opções de categorias para entradas e saídas
+        function gerarOpcoesCategoria(tipo, categoriaSelecionada) {
+            const categorias = tipo === "Entrada" ?
+                ["Salário", "Serviço", "Subsídio", "Financiamento", "Investimento", "Aluguel", "Doação", "Outros"] :
+                ["Supermercado", "Lazer", "Saúde", "Aluguel", "Água", "Luz", "Internet", "Serviços", "Financiamento", "Investimento", "Pensão", "Doação", "Retirada", "Seguro", "Imposto", "Gás", "Combustível", "Outros"];
+
+            return categorias.map(categoria => `
+        <option value="${categoria}" ${categoria === categoriaSelecionada ? "selected" : ""}>${categoria}</option>
+    `).join("");
+        }
+
+        // Atualiza as opções de categorias na tela de adição de transações com base no tipo selecionado
+        function updateCategoryOptions() {
+            const tipo = document.querySelector('input[name="tipo"]:checked').value;
+            const categoriaSelect = document.getElementById("categoria");
+            categoriaSelect.innerHTML = gerarOpcoesCategoria(tipo, "");
+        }
+
+        // Atualiza as opções de categorias ao editar uma transação
+        function updateCategoryOptionsEdit(id) {
+            const tipo = document.getElementById(`tipo-${id}`).value;
+            const categoriaSelect = document.getElementById(`categoria-${id}`);
+            const categoriaSelecionada = categoriaSelect.value;
+            categoriaSelect.innerHTML = gerarOpcoesCategoria(tipo, categoriaSelecionada);
+        }
+
+        // Calcula e exibe o resumo mensal de entradas, saídas e saldo total
+        function atualizarResumo() {
+            const transaction = db.transaction(["transacoes"], "readonly");
+            const objectStore = transaction.objectStore("transacoes");
+
+            let totalEntradas = 0;
+            let totalSaidas = 0;
+            let saldoMes = 0;
+            let saldoTotal = 0;
+            const dataAtual = new Date();
+            const mesAtual = dataAtual.getMonth() + 1;
+            const anoAtual = dataAtual.getFullYear();
+
+            objectStore.openCursor().onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const dataTransacao = new Date(cursor.value.data);
+                    const mesTransacao = dataTransacao.getMonth() + 1;
+                    const anoTransacao = dataTransacao.getFullYear();
+
+                    if (cursor.value.tipo === "Entrada") {
+                        if (mesTransacao === mesAtual && anoTransacao === anoAtual) {
+                            totalEntradas += cursor.value.valor;
+                            saldoMes += cursor.value.valor;
+                        }
+                        saldoTotal += cursor.value.valor;
+                    } else if (cursor.value.tipo === "Saída") {
+                        if (mesTransacao === mesAtual && anoTransacao === anoAtual) {
+                            totalSaidas += cursor.value.valor;
+                            saldoMes -= cursor.value.valor;
+                        }
+                        saldoTotal -= cursor.value.valor;
+                    }
+                    cursor.continue();
+                } else {
+                    const formatter = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                    document.getElementById("resumo").innerHTML = `
+                    <div style="margin-top: 16px;">
+                        <table>
+                            <tbody>
+                                <tr>
+                                    <td>Entradas do Mês:</td>
+                                    <td>${formatter.format(totalEntradas)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Saídas do Mês:</td>
+                                    <td>${formatter.format(totalSaidas)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Saldo do Mês:</td>
+                                    <td>${formatter.format(saldoMes)}</td>
+                                </tr>
+                                <tr>
+                                    <td>Saldo Total:</td>
+                                    <td>${formatter.format(saldoTotal)}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+                }
+            };
+        }
+
+        // Habilita os campos de uma transação específica para edição
+        function editarTransacao(id) {
+            const row = document.getElementById(`row-${id}`);
+            const dataCell = document.getElementById(`data-${id}`);
+            const tipoCell = document.getElementById(`tipo-${id}`);
+            const categoriaCell = document.getElementById(`categoria-${id}`);
+            const valorCell = document.getElementById(`valor-${id}`);
+            const descricaoCell = document.getElementById(`descricao-${id}`);
+
+            // Salva os valores originais como atributos
+            dataCell.setAttribute("data-original", dataCell.textContent.trim());
+            tipoCell.setAttribute("data-original", tipoCell.textContent.trim());
+            categoriaCell.setAttribute("data-original", categoriaCell.textContent.trim());
+            valorCell.setAttribute("data-original", valorCell.textContent.trim());
+            descricaoCell.setAttribute("data-original", descricaoCell.textContent.trim());
+
+            // Torna os campos editáveis
+            const [dia, mes, ano] = dataCell.textContent.trim().split('/');
+            const dataISO = `${ano}-${mes}-${dia}`;
+            dataCell.innerHTML = `<input type="date" value="${dataISO}">`;
+            tipoCell.innerHTML = `
+        <select>
+            <option value="Entrada" ${tipoCell.textContent.trim() === "Entrada" ? "selected" : ""}>Entrada</option>
+            <option value="Saída" ${tipoCell.textContent.trim() === "Saída" ? "selected" : ""}>Saída</option>
+        </select>`;
+            categoriaCell.innerHTML = `<input type="text" value="${categoriaCell.textContent.trim()}">`;
+            valorCell.innerHTML = `<input type="number" value="${valorCell.textContent.trim().replace('R$', '').replace(',', '.')}">`;
+            descricaoCell.innerHTML = `<input type="text" value="${descricaoCell.textContent.trim()}">`;
+
+            // Ajusta os botões
+            const editButton = row.querySelector(".edit-btn");
+            const saveButton = row.querySelector(".save-btn");
+            const cancelButton = row.querySelector(".cancel-btn");
+
+            editButton.style.display = "none";
+            saveButton.style.display = "inline-block";
+            cancelButton.style.display = "inline-block";
+        }
+
+        // Atualiza as opções de categoria ao editar uma transação
+        function atualizarCategoriasEdicao(id) {
+            const tipo = document.getElementById(`tipo-select-${id}`).value; // Tipo selecionado (Entrada ou Saída)
+            const categoriaSelect = document.getElementById(`categoria-select-${id}`);
+
+            // Atualiza as opções de categoria com base no tipo atual
+            categoriaSelect.innerHTML = gerarOpcoesCategoria(tipo, "");
+        }
+
+        // Salva as alterações feitas em uma transação no banco IndexedDB
+        function salvarTransacao(id) {
+            const dataInputISO = document.querySelector(`#row-${id} input[type="date"]`).value; // Formato aaaa-mm-dd
+            const tipo = document.querySelector(`#row-${id} select`).value;
+            const categoria = document.querySelector(`#row-${id} select[id="categoria-select-${id}"]`).value;
+            const valor = parseFloat(document.querySelector(`#row-${id} input[type="number"]`).value);
+            const descricao = document.querySelector(`#row-${id} input[type="text"]:last-of-type`).value;
+
+            // Converte a data de aaaa-mm-dd para dd/mm/aaaa
+            const [ano, mes, dia] = dataInputISO.split('-'); // Divide em [aaaa, mm, dd]
+            const dataInputBR = `${dia}/${mes}/${ano}`; // Formato dd/mm/aaaa
+
+            if (!dataInputISO || isNaN(Date.parse(dataInputISO))) {
+                alert("A data deve ser válida.");
+                return;
+            }
+
+            if (isNaN(valor) || valor <= 0) {
+                alert("O valor deve ser um número positivo.");
+                return;
+            }
+
+            const transaction = db.transaction(["transacoes"], "readwrite");
+            const objectStore = transaction.objectStore("transacoes");
+            const request = objectStore.get(id);
+
+            request.onsuccess = function (event) {
+                const dataObj = event.target.result;
+                dataObj.data = dataInputBR; // Salva a data no formato dd/mm/aaaa
+                dataObj.tipo = tipo;
+                dataObj.categoria = categoria;
+                dataObj.valor = valor;
+                dataObj.descricao = descricao;
+
+                const updateRequest = objectStore.put(dataObj);
+
+                updateRequest.onsuccess = function () {
+                    alert("Transação atualizada com sucesso!");
+                    exibirTransacoes('todos', 'registros');
+                };
+
+                updateRequest.onerror = function (event) {
+                    console.error("Erro ao atualizar a transação:", event.target.errorCode);
+                };
+            };
+        }
+
+        // Cancela a edição de uma transação, restaurando o estado original dos campos
+        function cancelarEdicao(id) {
+            const row = document.getElementById(`row-${id}`);
+            const dataCell = document.getElementById(`data-${id}`);
+            const tipoCell = document.getElementById(`tipo-${id}`);
+            const categoriaCell = document.getElementById(`categoria-${id}`);
+            const valorCell = document.getElementById(`valor-${id}`);
+            const descricaoCell = document.getElementById(`descricao-${id}`);
+
+            // Restaura os valores originais
+            dataCell.textContent = dataCell.getAttribute("data-original");
+            tipoCell.textContent = tipoCell.getAttribute("data-original");
+            categoriaCell.textContent = categoriaCell.getAttribute("data-original");
+            valorCell.textContent = valorCell.getAttribute("data-original");
+            descricaoCell.textContent = descricaoCell.getAttribute("data-original");
+
+            // Ajusta os botões
+            const editButton = row.querySelector(".edit-btn");
+            const saveButton = row.querySelector(".save-btn");
+            const cancelButton = row.querySelector(".cancel-btn");
+
+            editButton.style.display = "inline-block";
+            saveButton.style.display = "none";
+            cancelButton.style.display = "none";
+        }
+
+
+        // Exclui uma transação específica do banco IndexedDB
+        function excluirTransacao(id) {
+            if (confirm("Tem certeza de que deseja excluir esta transação?")) {
+                const transaction = db.transaction(["transacoes"], "readwrite");
+                const objectStore = transaction.objectStore("transacoes");
+                const request = objectStore.delete(id);
+
+                request.onsuccess = function () {
+                    alert("Transação excluída com sucesso!");
+                    exibirTransacoes('todos', 'registros');
+                    atualizarResumo();
+                };
+
+                request.onerror = function (event) {
+                    console.error("Erro ao excluir a transação:", event.target.errorCode);
+                };
+            }
+        }
+
+        // Filtra e exibe as transações com base no período selecionado
+        function filtrarRegistros(periodo) {
+            exibirTransacoes(periodo, 'registros');
+        }
+
+        // Aplica um filtro personalizado baseado nas datas de início e fim
+        function filtrarPorData() {
+            const dataInicio = document.getElementById("filterDataInicio").value;
+            const dataFim = document.getElementById("filterDataFim").value;
+
+            // Verifica se pelo menos uma data foi fornecida
+            if (!dataInicio && !dataFim) {
+                alert("Por favor, defina pelo menos uma data para filtrar.");
+                return;
+            }
+
+            // Chama exibirTransacoes com o filtro "filtro-personalizado"
+            exibirTransacoes('filtro-personalizado', 'registros');
+        }
+
+        // Gera o relatório de transações com base em um período especificado e calcula os totais
+        function gerarRelatorio(filtro) {
+            let dataInicio = null; // Valor padrão para ignorar o filtro
+            let dataFim = null;    // Valor padrão para ignorar o filtro
+
+            // Configurar os filtros de data com base no tipo de filtro
+            if (filtro === '30') {
+                dataInicio = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            } else if (filtro === '90') {
+                dataInicio = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+            } else if (filtro !== 'todos') {
+                // Apenas se não for "Todos", considerar os campos de data
+                dataInicio = document.getElementById("relatorioDataInicio").value || null;
+                dataFim = document.getElementById("relatorioDataFim").value || null;
+
+                // Verifica se pelo menos uma data foi fornecida
+                if (!dataInicio && !dataFim) {
+                    alert("Por favor, defina pelo menos uma data para filtrar.");
+                    return;
+                }
+            }
+
+            // Acessa o banco de dados para gerar o relatório
+            const transaction = db.transaction(["transacoes"], "readonly");
+            const objectStore = transaction.objectStore("transacoes");
+
+            let totalEntradas = 0;
+            let totalSaidas = 0;
+            registros = [];
+
+            objectStore.openCursor().onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    // Aplica o filtro de datas
+                    const dataRegistro = cursor.value.data;
+                    const dentroDoPeriodo = (!dataInicio || dataRegistro >= dataInicio) &&
+                        (!dataFim || dataRegistro <= dataFim);
+
+                    if (dentroDoPeriodo) {
+                        registros.push(cursor.value);
+                        // Soma os totais
+                        if (cursor.value.tipo === "Entrada") {
+                            totalEntradas += cursor.value.valor;
+                        } else if (cursor.value.tipo === "Saída") {
+                            totalSaidas += cursor.value.valor;
+                        }
+                    }
+                    cursor.continue();
+                } else {
+                    registros.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+                    // Após percorrer todos os registros, exibe o relatório
+                    mostrarPaginaRelatorio(1, totalEntradas, totalSaidas);
+                }
+            };
+        }
+
+        const transaction = db.transaction(["transacoes"], "readonly");
+        const objectStore = transaction.objectStore("transacoes");
+
+        let totalEntradas = 0;
+        let totalSaidas = 0;
+        registros = [];
+
+        // Abrir cursor para percorrer os registros
+        objectStore.openCursor().onsuccess = function (event) {
+            const cursor = event.target.result;
+            if (cursor) {
+                // Se "Todos", incluir todos os registros. Caso contrário, aplicar o filtro
+                if ((filtro === 'todos') ||
+                    ((!dataInicio || cursor.value.data >= dataInicio) &&
+                        (!dataFim || cursor.value.data <= dataFim))) {
+                    registros.push(cursor.value);
+                    // Calcular totais
+                    if (cursor.value.tipo === "Entrada") {
+                        totalEntradas += cursor.value.valor;
+                    } else if (cursor.value.tipo === "Saída") {
+                        totalSaidas += cursor.value.valor;
+                    }
+                }
+                cursor.continue();
+            } else {
+                // Após percorrer todos os registros, chamar a função de exibição
+                mostrarPaginaRelatorio(1, totalEntradas, totalSaidas);
+            }
+        };
+
+        // Atualiza os controles de paginação na tela de relatórios
+        function atualizarPaginacaoRelatorio() {
+            const totalPaginas = Math.ceil(registros.length / transacoesPorPaginaRelatorios);
+            let paginacaoHTML = '';
+
+            if (totalPaginas > 1) {
+                paginacaoHTML += `<button onclick="mostrarPaginaRelatorio(1);" ${paginaAtual === 1 ? 'disabled' : ''}>Primeira</button>`;
+                paginacaoHTML += `<button onclick="mostrarPaginaRelatorio(${paginaAtual - 1});" ${paginaAtual === 1 ? 'disabled' : ''}>&laquo; Anterior</button>`;
+                paginacaoHTML += `<span>Página ${paginaAtual} de ${totalPaginas}</span>`;
+                paginacaoHTML += `<button onclick="mostrarPaginaRelatorio(${paginaAtual + 1});" ${paginaAtual === totalPaginas ? 'disabled' : ''}>Próxima &raquo;</button>`;
+                paginacaoHTML += `<button onclick="mostrarPaginaRelatorio(${totalPaginas});" ${paginaAtual === totalPaginas ? 'disabled' : ''}>Última</button>`;
+            }
+
+            const paginacaoElement = document.getElementById("paginacaoRelatorio");
+            paginacaoElement.innerHTML = paginacaoHTML;
+            paginacaoElement.style.display = totalPaginas <= 1 ? "none" : "flex";
+        }
+
+        // Exibe as transações paginadas na tela de relatórios, incluindo totais e saldo
+        function mostrarPaginaRelatorio(pagina, totalEntradas = 0, totalSaidas = 0) {
+            paginaAtual = pagina;
+            const inicio = (paginaAtual - 1) * transacoesPorPaginaRelatorios;
+            const fim = paginaAtual * transacoesPorPaginaRelatorios;
+            const registrosPagina = registros.slice(inicio, fim);
+
+            let tabelaHTML = `<table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Categoria</th>
+                <th>Descrição</th>
+                <th>Entrada</th>
+                <th>Saída</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+            registrosPagina.forEach(item => {
+                tabelaHTML += `<tr>
+            <td>${formatarData(item.data)}</td>
+            <td>${item.categoria}</td>
+            <td>${item.descricao}</td>
+            <td>${item.tipo === "Entrada" ? item.valor.toLocaleString('pt-PT') : ''}</td>
+            <td>${item.tipo === "Saída" ? item.valor.toLocaleString('pt-PT') : ''}</td>
+        </tr>`;
+            });
+
+            // Totais e saldo
+            tabelaHTML += `<tr style="background-color: #f0f0f0;">
+        <td colspan="3">Total</td>
+        <td>${(totalEntradas || 0).toLocaleString('pt-PT')}</td>
+        <td>${(totalSaidas || 0).toLocaleString('pt-PT')}</td>
+    </tr>`;
+            tabelaHTML += `<tr style="background-color: #f0f0f0;">
+        <td colspan="3">Saldo</td>
+        <td colspan="2">${((totalEntradas || 0) - (totalSaidas || 0)).toLocaleString('pt-PT')}</td>
+    </tr>`;
+
+            tabelaHTML += `</tbody></table>`;
+
+            document.getElementById("resultadoRelatorio").innerHTML = tabelaHTML;
+            document.getElementById("resultadoRelatorio").style.display = "block";
+            atualizarPaginacaoRelatorio();
+        }
+
+        // Cria registros de teste aleatórios para simular dados no banco IndexedDB
+        function gerarRegistrosTeste() {
+            const numRegistros = parseInt(prompt("Quantos registros de teste deseja criar? (máximo 10000)"));
+            if (isNaN(numRegistros) || numRegistros <= 0 || numRegistros > 10000) {
+                alert("Número de registros inválido. Por favor, insira um número entre 1 e 10000.");
+                return;
+            }
+
+            const transaction = db.transaction(["transacoes"], "readwrite");
+            const objectStore = transaction.objectStore("transacoes");
+            const startTime = performance.now();
+
+            for (let i = 0; i < numRegistros; i++) {
+                const tipo = Math.random() > 0.5 ? "Entrada" : "Saída";
+                const valor = (Math.random() * 500).toFixed(2);
+                const descricao = "Test_dev_";
+                const data = new Date(Date.now() - Math.floor(Math.random() * 90) * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                const categoria = tipo === "Entrada" ? "Outros" : "Outros";
+                objectStore.add({ data, tipo, categoria, valor: parseFloat(valor), descricao });
+            }
+
+            transaction.oncomplete = function () {
+                const endTime = performance.now();
+                alert(`Registros de teste criados em ${(endTime - startTime).toFixed(2)} milissegundos.`);
+                atualizarResumo();
+            };
+
+            transaction.onerror = function (event) {
+                console.error("Erro ao criar registros de teste:", event.target.errorCode);
+            };
+        }
+
+        // Remove todos os registros de teste do banco IndexedDB
+        function apagarRegistrosTeste() {
+            const transaction = db.transaction(["transacoes"], "readwrite");
+            const objectStore = transaction.objectStore("transacoes");
+            const startTime = performance.now();
+            const request = objectStore.openCursor();
+
+            request.onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    if (cursor.value.descricao === "Test_dev_") {
+                        objectStore.delete(cursor.primaryKey);
+                    }
+                    cursor.continue();
+                } else {
+                    const endTime = performance.now();
+                    alert(`Registros de teste apagados em ${(endTime - startTime).toFixed(2)} milissegundos.`);
+                    atualizarResumo();
+                }
+            };
+
+            request.onerror = function (event) {
+                console.error("Erro ao apagar registros de teste:", event.target.errorCode);
+            };
+        }
+
+        // Executa uma busca avançada de transações com base em filtros como data, tipo, categoria e descrição
+        function executarBusca() {
+            // Coleta dos valores dos campos do formulário
+            const dataInicio = document.getElementById('buscaDataInicio').value;
+            let dataFim = document.getElementById('buscaDataFim').value;
+            const entradaSelecionada = document.getElementById('buscaEntrada').checked;
+            const saidaSelecionada = document.getElementById('buscaSaida').checked;
+            const categoria = document.getElementById('buscaCategoria').value;
+            const descricao = document.getElementById('buscaDescricao').value;
+
+            // Se dataInicio for selecionada e dataFim estiver vazio, definir dataFim igual a dataInicio
+            if (dataInicio && !dataFim) {
+                dataFim = dataInicio;
+            }
+
+            // Criação do objeto de filtros a ser utilizado na busca
+            const filtros = {
+                dataInicio: dataInicio || null,
+                dataFim: dataFim || null,
+                tipos: [],  // Inicializa o array de tipos
+                categoria: categoria || null,
+                descricao: descricao || null
+            };
+
+            // Adiciona "Entrada" ou "Saída" ao filtro de tipos, conforme a seleção do usuário
+            if (entradaSelecionada) filtros.tipos.push("Entrada");
+            if (saidaSelecionada) filtros.tipos.push("Saída");
+
+            // Verifica se pelo menos um critério de busca foi preenchido
+            const algumFiltroPreenchido = dataInicio || entradaSelecionada || saidaSelecionada || categoria || descricao;
+
+            if (!algumFiltroPreenchido) {
+                alert("Preencha pelo menos um critério de busca.");
+                return; // Se nenhum filtro for preenchido, interrompe a execução
+            }
+
+            // Acesso ao banco de dados IndexedDB
+            const transaction = db.transaction(["transacoes"], "readonly");
+            const objectStore = transaction.objectStore("transacoes");
+
+            const registrosFiltrados = [];
+
+            objectStore.openCursor().onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    const registro = cursor.value;
+                    const dataRegistro = new Date(registro.data);
+                    const dataInicioFiltro = filtros.dataInicio ? new Date(filtros.dataInicio) : null;
+                    const dataFimFiltro = filtros.dataFim ? new Date(filtros.dataFim) : null;
+
+                    // Verificação dos filtros
+                    const dentroDoPeriodo = (!dataInicioFiltro || dataRegistro >= dataInicioFiltro) &&
+                        (!dataFimFiltro || dataRegistro <= dataFimFiltro);
+                    const tipoCorreto = filtros.tipos.length === 0 || filtros.tipos.includes(registro.tipo);
+                    const categoriaCorreta = !filtros.categoria || registro.categoria === filtros.categoria;
+                    const descricaoCorreta = !filtros.descricao || registro.descricao.includes(filtros.descricao);
+
+                    if (dentroDoPeriodo && tipoCorreto && categoriaCorreta && descricaoCorreta) {
+                        registrosFiltrados.push(registro);
+                    }
+
+                    cursor.continue();
+                } else {
+                    registrosFiltrados.sort((a, b) => new Date(b.data) - new Date(a.data));
+
+                    // Exibe os resultados da busca
+                    exibirResultadosBusca(registrosFiltrados);
+                }
+            };
+
+            objectStore.openCursor().onerror = function (event) {
+                console.error("Erro ao buscar registros:", event.target.errorCode);
+                alert('Ocorreu um erro ao buscar os registros. Por favor, tente novamente mais tarde.');
+            };
+        }
+
+        // Exibe os resultados da busca avançada em uma tabela visível ao usuário
+        function exibirResultadosBusca(registrosFiltrados) {
+            const tabela = document.getElementById("resultadoTabela");
+            const tbody = document.getElementById("resultadoBusca");
+
+            // Verifica se há registros a serem exibidos
+            if (registrosFiltrados.length === 0) {
+                alert("Nenhum registro encontrado.");
+                tabela.style.display = "none";  // Oculta a tabela
+                return;
+            }
+
+            // Preenche a tabela com os dados dos registros filtrados
+            tbody.innerHTML = registrosFiltrados.map(registro => `
+    <tr>
+        <td>${formatarData(registro.data)}</td>
+        <td>${registro.tipo}</td>
+        <td>${registro.categoria}</td>
+        <td>${formatarNumero(registro.valor)}</td>
+        <td>${registro.descricao}</td>
+    </tr>
+`).join(''); // Converte o array de HTML para uma string e insere no corpo da tabela
+
+            // Torna a tabela visível
+            tabela.style.display = "block";
+        }
+
+        // Habilita e popula o campo de categorias na busca avançada com base no tipo selecionado
+        function atualizarCategorias() {
+            const entradaSelecionada = document.getElementById('buscaEntrada').checked;
+            const saidaSelecionada = document.getElementById('buscaSaida').checked;
+            const categoriaSelect = document.getElementById('buscaCategoria');
+
+            // Se nenhum tipo foi selecionado, desabilita o campo de categoria
+            if (!entradaSelecionada && !saidaSelecionada) {
+                categoriaSelect.disabled = true;
+                categoriaSelect.innerHTML = "";  // Limpa as opções
+                return;
+            }
+
+            categoriaSelect.disabled = false;  // Habilita o campo de categoria
+            let categorias = [];
+
+            // Adiciona categorias específicas conforme o tipo selecionado
+            if (entradaSelecionada) categorias.push("Salário", "Serviço", "Subsídio", "Financiamento", "Investimento", "Aluguel", "Doação", "Outros");
+            if (saidaSelecionada) categorias.push("Supermercado", "Lazer", "Saúde", "Aluguel", "Água", "Luz", "Internet", "Serviços", "Financiamento", "Investimento", "Pensão", "Doação", "Retirada", "Seguro", "Imposto", "Gás", "Combustível", "Outros");
+
+            // Preenche o campo de categoria com as novas opções
+            categoriaSelect.innerHTML = categorias.map(cat => `
+    <option value="${cat}">${cat}</option>
+`).join('');
+        }
+
+        // Função importar
+        // Função para excluir os dados do banco de dados usando Promise
+        function excluirBancoDados() {
+            return new Promise((resolve, reject) => {
+                const dbName = "financeDB";
+
+                const request = indexedDB.open(dbName, 1);
+
+                request.onsuccess = function (event) {
+                    const db = event.target.result;
+                    const transaction = db.transaction(["transacoes"], "readwrite");
+                    const objectStore = transaction.objectStore("transacoes");
+
+                    const clearRequest = objectStore.clear();
+
+                    clearRequest.onsuccess = function () {
+                        console.log("Dados apagados com sucesso.");
+                        resolve(); // Resolve a Promise após limpar os dados
+                    };
+
+                    clearRequest.onerror = function (event) {
+                        console.error("Erro ao apagar os dados:", event.target.errorCode);
+                        reject("Erro ao apagar os dados."); // Rejeita a Promise em caso de erro
+                    };
+                };
+
+                request.onerror = function (event) {
+                    console.error("Erro ao abrir o banco de dados:", event.target.errorCode);
+                    reject("Erro ao abrir o banco de dados."); // Rejeita a Promise em caso de erro
+                };
+            });
+        }
+
+        // Função principal para importar os dados
+        async function importarDados(event) {
+            const arquivo = event.target.files[0];
+            if (!arquivo) {
+                alert("Nenhum arquivo selecionado.");
+                return;
+            }
+
+            // Exibir aviso sobre perda de dados e confirmação
+            const confirmar = confirm("Ao importar, todos os dados existentes serão apagados. Deseja continuar?");
+            if (!confirmar) {
+                alert("Importação cancelada.");
+                return;
+            }
+
+            try {
+                // Aguarda a exclusão dos dados
+                await excluirBancoDados();
+
+                // Inicia a importação
+                const leitor = new FileReader();
+
+                leitor.onload = async function (e) {
+                    try {
+                        const dados = JSON.parse(e.target.result);
+
+                        // Verificar se o JSON contém registros válidos
+                        if (!Array.isArray(dados) || !dados.every(registro => registro.data && registro.tipo && registro.categoria && registro.valor)) {
+                            throw new Error("O arquivo JSON não está no formato esperado.");
+                        }
+
+                        // Adicionar novos registros ao banco de dados
+                        const dbRequest = indexedDB.open("financeDB", 1);
+
+                        dbRequest.onsuccess = function (event) {
+                            const db = event.target.result;
+                            const transaction = db.transaction(["transacoes"], "readwrite");
+                            const objectStore = transaction.objectStore("transacoes");
+
+                            dados.forEach(registro => {
+                                if (registro.data && registro.tipo && registro.categoria && !isNaN(parseFloat(registro.valor))) {
+                                    objectStore.add({
+                                        data: registro.data,
+                                        tipo: registro.tipo,
+                                        categoria: registro.categoria,
+                                        valor: parseFloat(registro.valor),
+                                        descricao: registro.descricao || ""
+                                    });
+                                }
+                            });
+
+                            transaction.oncomplete = function () {
+                                alert("Dados importados com sucesso!");
+                                atualizarResumo(); // Atualiza a interface após a importação
+                            };
+
+                            transaction.onerror = function (event) {
+                                console.error("Erro ao importar dados:", event.target.errorCode);
+                                alert("Erro ao importar dados. Verifique o arquivo e tente novamente.");
+                            };
+                        };
+
+                        dbRequest.onerror = function (event) {
+                            console.error("Erro ao abrir o banco de dados:", event.target.errorCode);
+                            alert("Erro ao abrir o banco de dados para importação.");
+                        };
+                    } catch (erro) {
+                        console.error("Erro ao processar o arquivo:", erro.message);
+                        alert("Erro ao processar o arquivo. Verifique o formato e tente novamente.");
+                    }
+                };
+
+                leitor.readAsText(arquivo);
+            } catch (erro) {
+                console.error("Erro durante a exclusão dos dados:", erro);
+                alert("Erro ao limpar os dados. A importação foi cancelada.");
+            }
+        }
+
+
+        // Exporta todas as transações do banco IndexedDB para um arquivo JSON
+        function exportarDados() {
+            const transaction = db.transaction(["transacoes"], "readonly");
+            const objectStore = transaction.objectStore("transacoes");
+
+            const registros = [];
+            objectStore.openCursor().onsuccess = function (event) {
+                const cursor = event.target.result;
+                if (cursor) {
+                    registros.push(cursor.value);
+                    cursor.continue();
+                } else {
+                    const blob = new Blob([JSON.stringify(registros, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = "backup_home-budget.json";
+                    link.click();
+                    URL.revokeObjectURL(url);
+                }
+            };
+
+            objectStore.openCursor().onerror = function (event) {
+                console.error("Erro ao exportar dados:", event.target.errorCode);
+                alert("Erro ao exportar os dados. Tente novamente.");
+            };
+        }
+
+        // Limpa todos os dados do banco de dados sem deletá-lo
+        function excluirBancoDados() {
+            const dbName = "financeDB"; // Nome do banco de dados do seu projeto
+
+            // Gerar um código de confirmação aleatório (entre 100 e 999)
+            const generatedCode = Math.floor(100 + Math.random() * 900);
+
+            // Primeira confirmação: garantir que o usuário realmente quer limpar os dados
+            const primeiraConfirmacao = confirm(
+                "Você tem certeza de que deseja apagar todos os dados? Esta ação é irreversível."
+            );
+
+            if (primeiraConfirmacao) {
+                // Solicita o código de confirmação gerado
+                const codigoUsuario = prompt(
+                    `Para confirmar a exclusão, insira o código de confirmação gerado:\nCódigo: ${generatedCode}`
+                );
+
+                // Verifica se o código inserido está correto
+                if (parseInt(codigoUsuario) === generatedCode) {
+                    // Acessa o banco de dados e remove todos os registros
+                    const request = indexedDB.open(dbName, 1);
+
+                    request.onsuccess = function (event) {
+                        const db = event.target.result;
+                        const transaction = db.transaction(["transacoes"], "readwrite");
+                        const objectStore = transaction.objectStore("transacoes");
+                        const clearRequest = objectStore.clear();
+
+                        clearRequest.onsuccess = function () {
+                            alert("Todos os dados foram apagados com sucesso!");
+                            atualizarResumo(); // Atualiza a interface
+                        };
+
+                        clearRequest.onerror = function (event) {
+                            console.error("Erro ao limpar os dados:", event.target.errorCode);
+                            alert("Erro ao apagar os dados. Tente novamente.");
+                        };
+                    };
+
+                    request.onerror = function (event) {
+                        console.error("Erro ao acessar o banco de dados:", event.target.errorCode);
+                        alert("Erro ao acessar o banco de dados. Tente novamente.");
+                    };
+                } else {
+                    console.log("Código incorreto. Exclusão cancelada.");
+                    alert("Código incorreto. A exclusão foi cancelada.");
+                }
+            } else {
+                console.log("Exclusão de dados cancelada pelo usuário.");
+                alert("A exclusão de dados foi cancelada.");
+            }
+        }
+
+        // Limpa a tabela de registros
+        function limparRegistros() {
+            const tabelaTransacoes = document.getElementById("tabelaTransacoes");
+            const paginacao = document.getElementById("paginacao");
+
+            if (tabelaTransacoes) {
+                tabelaTransacoes.innerHTML = '';
+                tabelaTransacoes.style.display = 'none';
+            }
+
+            if (paginacao) {
+                paginacao.innerHTML = '';
+                paginacao.style.display = 'none';
+            }
+        }
+
+        // Limpa a tabela de relatórios
+        function limparRelatorios() {
+            const resultadoRelatorio = document.getElementById("resultadoRelatorio");
+            const paginacaoRelatorio = document.getElementById("paginacaoRelatorio");
+
+            if (resultadoRelatorio) {
+                resultadoRelatorio.innerHTML = '';
+                resultadoRelatorio.style.display = 'none';
+            }
+
+            if (paginacaoRelatorio) {
+                paginacaoRelatorio.innerHTML = '';
+                paginacaoRelatorio.style.display = 'none';
+            }
+        }
+
+        // Limpa os resultados da busca
+        function limparBusca() {
+            const resultadoTabela = document.getElementById("resultadoTabela");
+            const resultadoBusca = document.getElementById("resultadoBusca");
+
+            if (resultadoTabela) {
+                resultadoTabela.style.display = 'none';
+            }
+
+            if (resultadoBusca) {
+                resultadoBusca.innerHTML = '';
+            }
+        }
+
+        // Função para editar um registro
+        function editarRegistro(id) {
+            const dataCell = document.getElementById(`data-${id}`);
+            const descricaoCell = document.getElementById(`descricao-${id}`);
+            const valorCell = document.getElementById(`valor-${id}`);
+
+            // Extrai e converte o valor da data de dd/mm/aaaa para aaaa-mm-dd
+            const dataAtualBR = dataCell.textContent.trim(); // Exemplo: "01/01/2023"
+            const [dia, mes, ano] = dataAtualBR.split('/'); // Divide em [dd, mm, aaaa]
+            const dataAtualISO = `${ano}-${mes}-${dia}`; // Formato yyyy-mm-dd para input[type="date"]
+
+            // Remove os separadores de milhar e converte a vírgula decimal para ponto decimal
+            const valorSemSeparadores = valorCell.textContent.replace(/\./g, '').replace(',', '.').replace('R$', '').trim();
+
+            // Cria inputs editáveis para cada célula
+            dataCell.innerHTML = `<input type="date" value="${dataAtualISO}" data-original="${dataAtualBR}">`;
+            descricaoCell.innerHTML = `<input type="text" value="${descricaoCell.textContent.trim()}" data-original="${descricaoCell.textContent.trim()}">`;
+            valorCell.innerHTML = `<input type="number" value="${valorSemSeparadores}" data-original="${valorCell.textContent.trim()}">`;
+
+            // Botões de ação
+            const editButton = document.querySelector(`#row-${id} .edit-btn`);
+            const saveButton = document.querySelector(`#row-${id} .save-btn`);
+            const cancelButton = document.querySelector(`#row-${id} .cancel-btn`);
+
+            editButton.style.display = "none";
+            saveButton.style.display = "inline-block";
+            cancelButton.style.display = "inline-block";
+        }
+
+        // Função para salvar um registro editado
+        function salvarRegistro(id) {
+            const dataCell = document.getElementById(`data-${id}`);
+            const descricaoCell = document.getElementById(`descricao-${id}`);
+            const valorCell = document.getElementById(`valor-${id}`);
+
+            const dataInput = dataCell.querySelector('input');
+            const descricaoInput = descricaoCell.querySelector('input');
+            const valorInput = valorCell.querySelector('input');
+
+            // Formata a data de aaaa-mm-dd para dd/mm/aaaa
+            const dataFormatada = dataInput.value.split('-').reverse().join('/');
+
+            // Atualiza as células com os novos valores
+            dataCell.innerHTML = dataFormatada;
+            descricaoCell.innerHTML = descricaoInput.value;
+            valorCell.innerHTML = `R$ ${parseFloat(valorInput.value).toFixed(2).replace('.', ',')}`;
+
+            // Botões de ação
+            const editButton = document.querySelector(`#row-${id} .edit-btn`);
+            const saveButton = document.querySelector(`#row-${id} .save-btn`);
+            const cancelButton = document.querySelector(`#row-${id} .cancel-btn`);
+
+            editButton.style.display = "inline-block";
+            saveButton.style.display = "none";
+            cancelButton.style.display = "none";
+        }
+
+
+    </script>
+
+</head>
+
+<body>
+    <header>
+
+        <button class="menu-toggle" onclick="toggleMenu()">☰ Menu</button>
+
+        <nav class="nav-bar">
+            <a href="#" onclick="location.reload()">INÍCIO</a>
+            <a href="#" onclick="limparRelatorios(); switchContainer('relatorios-container')">RELATÓRIOS</a>
+            <a href="#" onclick="limparRegistros(); switchContainer('registros-container')">REGISTROS</a>
+            <a href="#" onclick="limparBusca(); switchContainer('busca-container')">BUSCA</a>
+            <a href="#" onclick="switchContainer('config-container')">FERRAMENTAS</a>
+            <!-- <a href="#" onclick="switchContainer('dev-container')">DEV</a> -->
+
+        </nav>
+
+    </header>
+    <main>
+
+        <!--  -->
+        <section id="inicio-container">
+            <h1>Orçamento Doméstico</h1>
+            <br>
+            <form id="formTransacao" onsubmit="adicionarTransacao(); return false;">
+                <div class="grid-container">
+                    <div class="container">
+                        <div class="form-group">
+                            <label for="data">Data:</label>
+                            <input type="date" id="data" required>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label class="margin-tipo">Tipo:</label>
+                            <div>
+                                <label for="entrada">
+                                    <input type="radio" id="entrada" name="tipo" value="Entrada"
+                                        onchange="updateCategoryOptions()"> Entrada
+                                </label>
+                                <label for="saida">
+                                    <input type="radio" id="saida" name="tipo" value="Saída" checked
+                                        onchange="updateCategoryOptions()"> Saída
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid-container">
+                    <div class="container">
+                        <div class="form-group">
+                            <label for="categoria">Categoria:</label>
+                            <select id="categoria" required></select>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="form-group">
+                            <label for="valor">Valor:</label>
+                            <input type="number" id="valor" name="valor" step="0.01" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="descricao">Descrição:</label>
+                            <input type="text" id="descricao" name="descricao" />
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn-custom">Adicionar Transação</button>
+                    </div>
+            </form>
+            <div id="resumo" class="mt-16"></div>
+        </section>
+        <!--  -->
+
+        <!--  -->
+        <section id="registros-container" class="hidden">
+            <h1>Registros</h1>
+            <br>
+            <div class="input-grupo">
+                <!-- Campos de entrada -->
+                <input type="date" id="filterDataInicio" placeholder="Data Início">
+                <input type="date" id="filterDataFim" placeholder="Data Fim">
+            </div>
+            <div class="input-grupo">
+                <!-- Botões -->
+                <button onclick="exibirTransacoes('30', 'registros')" class="btn-custom">Últimos 30 Dias</button>
+                <button onclick="exibirTransacoes('90', 'registros')" class="btn-custom">Últimos 90 Dias</button>
+                <button onclick="filtrarPorData()" class="btn-custom">Filtrar por Data</button>
+                <button onclick="exibirTransacoes('todos', 'registros')" class="btn-custom">Todos</button>
+            </div>
+            <div class="table-container">
+                <div id="tabelaTransacoes" class="hidden"></div>
+            </div>
+            <div id="paginacao" class="pagination hidden"></div>
+        </section>
+        <!--  -->
+
+        <!--  -->
+        <section id="relatorios-container" class="hidden">
+            <h1>Gerar Relatório</h1>
+            <br>
+            <div class="input-grupo">
+                <!-- Campos de entrada -->
+                <input type="date" id="relatorioDataInicio" placeholder="Data Início">
+                <input type="date" id="relatorioDataFim" placeholder="Data Fim">
+            </div>
+            <div class="input-grupo">
+                <!-- Botões -->
+                <button onclick="gerarRelatorio('30')" class="btn-custom">Últimos 30 Dias</button>
+                <button onclick="gerarRelatorio('90')" class="btn-custom">Últimos 90 Dias</button>
+                <button onclick="gerarRelatorio()" class="btn-custom">Filtrar por Data</button>
+                <button onclick="gerarRelatorio('todos')" class="btn-custom">Todos</button>
+            </div>
+            <div class="table-container">
+                <div id="resultadoRelatorio" class="hidden"></div>
+            </div>
+            <div id="paginacaoRelatorio" class="pagination hidden"></div>
+        </section>
+        <!--  -->
+
+        <!--  -->
+        <section id="busca-container" class="hidden">
+            <h1>Busca Avançada</h1>
+            <br>
+            <form id="formBusca" onsubmit="executarBusca(); return false;">
+                <div class="input-grupo">
+                    <!-- <label for="buscaDataInicio">Data Início:</label> -->
+                    <input type="date" id="buscaDataInicio">
+
+                    <!-- <label for="buscaDataFim">Data Fim:</label> -->
+                    <input type="date" id="buscaDataFim">
+                </div>
+
+                <!-- Agrupamento de Tipo e Categoria em uma única linha -->
+                <div>
+                    <!-- Tipo -->
+                    <div class="radio-spacing">
+                        <label class="margin-tipo">Tipo:</label>
+                        <label for="buscaEntrada">
+                            <input type="checkbox" id="buscaEntrada" name="tipo" value="Entrada"> Entrada
+                        </label>
+                        <label for="buscaSaida">
+                            <input type="checkbox" id="buscaSaida" name="tipo" value="Saída"> Saída
+                        </label>
+                    </div>
+
+                    <!-- Categoria -->
+                    <div>
+                        <label for="buscaCategoria">Categoria:</label>
+                        <select id="buscaCategoria" disabled></select>
+                    </div>
+                </div>
+
+                <!-- Descrição -->
+                <div>
+                    <label for="buscaDescricao">Descrição:</label>
+                    <input type="text" id="buscaDescricao" placeholder="">
+                </div>
+
+                <button type="submit" class="btn-custom">Buscar</button>
+            </form>
+
+            <div class="table-container hidden" id="resultadoTabela">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Tipo</th>
+                            <th>Categoria</th>
+                            <th>Valor</th>
+                            <th>Descrição</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultadoBusca">
+                        <!-- Resultados da busca serão inseridos aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!--  -->
+
+        <!--  -->
+        <section id="config-container" class="hidden">
+            <h1>Ferramentas</h1>
+            <br>
+            <div class="input-grupo">
+                <button onclick="exportarDados()" class="btn-custom">Exportar Dados</button>
+                <button onclick="document.getElementById('importarArquivo').click();" class="btn-custom">Importar
+                    Dados</button>
+                <button onclick="excluirBancoDados()" class="btn-custom"
+                    style="background-color: #e53e3e; color: white;">
+                    Excluir Dados
+                </button>
+                <button onclick="switchContainer('sobre-container')" class="btn-custom">Sobre</button>
+            </div>
+            <input type="file" id="importarArquivo" accept=".json" class="hidden" onchange="importarDados(event)">
+        </section>
+        <!--  -->
+
+        <!-- -->
+        <section id="dev-container" class="hidden">
+            <h1>Dev</h1>
+            <div class="input-grupo">
+                <button onclick="gerarRegistrosTeste()" class="btn">Gerar Registros de Teste</button>
+                <button onclick="apagarRegistrosTeste()" class="btn btn-danger">Apagar Registros de Teste</button>
+            </div>
+        </section>
+        <!-- -->
+
+        <!--  -->
+        <section id="sobre-container" class="hidden">
+            <h1>Sobre</h1>
+            <br>
+            <p>Desenvolvido por André Ricardo</p>
+            <br>
+            <p>
+                Este software é um projeto de código aberto, licenciado sob a Licença Pública Geral GNU versão 3
+                (<a href="#" onclick="switchContainer('licenca-container')">GPLv3</a>).
+                Você é livre para utilizá-lo, modificá-lo e redistribuí-lo, desde que mantenha a mesma licença e os
+                devidos créditos ao autor.
+            </p>
+            <br>
+            Não esqueça, é vital exportar seus dados regularmente para um local seguro.
+            Afinal, a segurança é uma ilusão, mas a precaução é uma arte.
+            </p>
+            <br>
+            <p>Grupo <a href="https://t.me/Home_Budget">t.me/Home_Budget</a> | Pessoal <a
+                    href="https://t.me/andre_ricardo">t.me/andre_ricardo</a></p>
+            <br>
+            <p>
+                Caso considere este software útil e deseje apoiar seu desenvolvimento,
+                você pode fazer uma doação via PayPal.
+            </p>
+            <form action="https://www.paypal.com/donate" method="post" target="_top">
+                <input type="hidden" name="hosted_button_id" value="36A6XS27LY7BY">
+                <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif" border="0"
+                    name="submit" title="PayPal - The safer, easier way to pay online!" alt="Donate with PayPal button">
+                <img alt="" border="0" src="https://www.paypal.com/en_US/i/scr/pixel.gif" width="1" height="1">
+            </form>
+            <p>
+        </section>
+        <!--  -->
+
+        <!--  -->
+        <section id="licenca-container" class="hidden">
+            <h1>Licença</h1>
+            <br>
+            <p>Copyright (C) 2024 André Ricardo</p>
+            <br>
+            <p>
+                Este programa é software livre: você pode redistribuí-lo e/ou modificá-lo sob os termos da Licença
+                Pública Geral GNU, publicada pela Fundação para o Software Livre, versão 3 da Licença ou qualquer versão
+                posterior.
+            </p>
+            <p>
+                Este programa é distribuído na esperança de que seja útil, mas SEM QUALQUER GARANTIA; sem mesmo a
+                garantia implícita de COMERCIABILIDADE ou ADEQUAÇÃO A UM PROPÓSITO ESPECÍFICO. Consulte a Licença
+                Pública Geral GNU para mais detalhes.
+            </p>
+            <p>
+                Você deve ter recebido uma cópia da Licença Pública Geral GNU junto com este programa. Caso contrário,
+                veja <a href="https://www.gnu.org/licenses/">https://www.gnu.org/licenses/</a>.
+            </p>
+        </section>
+        <!--  -->
+
+    </main>
+
+</body>
+
+</html>
