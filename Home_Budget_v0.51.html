@@ -648,13 +648,11 @@
 
             if (campoInicio && campoFim) {
                 const sincronizarDatas = () => {
-                    console.log("Sincronizando datas...");
                     const dataInicio = new Date(campoInicio.value);
                     const dataFim = new Date(campoFim.value);
 
                     if (dataInicio) {
                         if (dataFim < dataInicio) {
-                            console.log("Ajustando data de fim para ser igual à data de início...");
                             campoFim.value = campoInicio.value;
                             campoFim.setCustomValidity("A data de fim foi ajustada para ser igual à data de início.");
                         } else {
@@ -664,7 +662,6 @@
                 };
 
                 const copiarDataInicioParaFim = () => {
-                    console.log("Copiando data de início para data de fim...");
                     if (!campoFim.value) {
                         campoFim.value = campoInicio.value;
                         campoFim.setCustomValidity("");
@@ -672,28 +669,23 @@
                 };
 
                 campoInicio.addEventListener('change', () => {
-                    console.log("Evento change no campo de início...");
                     copiarDataInicioParaFim();
                     sincronizarDatas();
                 });
 
                 campoInicio.addEventListener('input', () => {
-                    console.log("Evento input no campo de início...");
                     sincronizarDatas();
                 });
 
                 campoFim.addEventListener('change', () => {
-                    console.log("Evento change no campo de fim...");
                     sincronizarDatas();
                 });
 
                 campoFim.addEventListener('input', () => {
-                    console.log("Evento input no campo de fim...");
                     sincronizarDatas();
                 });
 
                 campoFim.addEventListener('blur', () => {
-                    console.log("Evento blur no campo de fim...");
                     sincronizarDatas();
                 });
             }
