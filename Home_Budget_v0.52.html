@@ -302,6 +302,9 @@
             /* Espaço entre label e input */
         }
 
+        .margin-tipo {
+            margin-right: 25px;
+        }
 
         /* Formulários e inputs */
         input,
@@ -378,7 +381,6 @@
             /* Alinha os itens no centro horizontalmente */
             gap: 0px;
             /* Adiciona espaçamento entre label e input */
-
         }
 
         /* Ajuste específico para as labels dos radios */
@@ -394,7 +396,6 @@
             margin-right: 0px;
             /* Se quiser adicionar um espaçamento extra entre os radios */
         }
-
 
         /* Classe para ajustar o espaçamento entre os botões de rádio */
         .radio-spacing {
@@ -1745,7 +1746,7 @@
                     </div>
                     <div>
                         <div class="form-group">
-                            <label>Tipo:</label>
+                            <label class="margin-tipo">Tipo:</label>
                             <div>
                                 <label for="entrada">
                                     <input type="radio" id="entrada" name="tipo" value="Entrada"
@@ -1848,7 +1849,7 @@
                 <div>
                     <!-- Tipo -->
                     <div class="radio-spacing">
-                        <label>Tipo:</label>
+                        <label class="margin-tipo">Tipo:</label>
                         <label for="buscaEntrada">
                             <input type="checkbox" id="buscaEntrada" name="tipo" value="Entrada"> Entrada
                         </label>
