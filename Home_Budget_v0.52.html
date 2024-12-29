@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!-- 
- * Home Budget v0.48 (Última Atualização: 27/12/2024)
+ * Home Budget v0.52 (Última Atualização: 29/12/2024)
  *
  * Descrição: O Home Budget é um software livre criado para simplificar o gerenciamento
  * financeiro doméstico. Ele permite que você controle suas receitas e despesas de forma
@@ -110,76 +110,58 @@
             /* Ocultar por padrão */
         }
 
+        /* Consolidando todas as regras @media */
+
         /* Estilo para telas grandes */
         @media (min-width: 769px) {
             .nav-bar {
-                /* Navbar visível e com largura padrão */
                 flex-direction: row;
-                /* Alinha itens horizontalmente */
                 justify-content: space-evenly;
                 width: 50%;
-                /* A largura da navbar ocupa toda a tela */
                 padding: 10px;
-                /* Padroniza o espaçamento interno */
             }
 
             .nav-bar a {
                 width: auto;
-                /* Largura automática para links */
                 font-size: 1rem;
-                /* Tamanho de fonte normal */
             }
         }
 
         /* Estilo para telas pequenas */
         @media (max-width: 768px) {
-
-            /* Exibir o botão de menu */
             .menu-toggle {
                 display: block;
                 margin: 0 auto;
                 background-color: #f0f0f0;
-                /* Cor de fundo do botão */
                 color: #000;
-                /* Cor do texto */
                 padding: 10px;
                 font-size: 18px;
                 border: none;
                 cursor: pointer;
                 width: 50%;
-                /* Ocupa toda a largura */
                 text-align: center;
             }
 
             .menu-toggle:focus {
                 outline: none;
-                /* Remove o contorno padrão */
             }
 
-            /* Navbar oculta por padrão */
             .nav-bar {
                 visibility: hidden;
                 opacity: 0;
                 flex-direction: column;
-                /* Alinha itens verticalmente */
                 position: fixed;
-                /* Ocupa toda a tela */
                 top: 0;
                 left: 0;
                 width: 100%;
                 height: 100%;
                 background-color: #f0f0f0;
-                /* Cor de fundo */
                 align-items: center;
-                /* Centraliza horizontalmente */
                 justify-content: center;
-                /* Centraliza verticalmente */
                 gap: 20px;
-                /* Espaçamento entre os links */
                 transition: visibility 0.3s, opacity 0.3s ease-in-out;
             }
 
-            /* Navbar visível quando ativa */
             .nav-bar.active {
                 visibility: visible;
                 opacity: 1;
@@ -187,15 +169,36 @@
 
             .nav-bar a {
                 width: 100%;
-                /* Links ocupam toda a largura */
                 font-size: 1.2rem;
-                /* Texto maior para melhor usabilidade */
             }
 
             .nav-bar a:hover {
                 background-color: #ddd;
-                /* Cor de fundo ao passar o mouse */
                 border-radius: 5px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                /* Habilita rolagem horizontal */
+                display: block;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+
+            th,
+            td {
+                padding: 10px;
+                text-align: left;
+            }
+
+            .edit-btn,
+            .save-btn,
+            .cancel-btn {
+                display: inline-block;
+                margin-top: 10px;
             }
         }
 
@@ -367,10 +370,6 @@
             text-align: justify;
         }
 
-        .margin-tipo {
-            margin-right: 25px;
-        }
-
         /* Centraliza os elementos da label e radios na tela de início */
         #formTransacao .form-group {
             display: flex;
@@ -379,6 +378,7 @@
             /* Alinha os itens no centro horizontalmente */
             gap: 0px;
             /* Adiciona espaçamento entre label e input */
+
         }
 
         /* Ajuste específico para as labels dos radios */
@@ -394,6 +394,7 @@
             margin-right: 0px;
             /* Se quiser adicionar um espaçamento extra entre os radios */
         }
+
 
         /* Classe para ajustar o espaçamento entre os botões de rádio */
         .radio-spacing {
@@ -498,32 +499,6 @@
             padding: 5px 10px;
             border-radius: 5px;
             cursor: pointer;
-        }
-
-        /* Consolidando todas as regras @media para max-width: 768px */
-        @media (max-width: 768px) {
-            table {
-                width: 100%;
-                border-collapse: collapse;
-            }
-
-            th, td {
-                padding: 10px;
-                text-align: left; /* Alinha o texto à esquerda */
-            }
-
-            .edit-btn, .save-btn, .cancel-btn {
-                display: inline-block;
-                margin-top: 10px;
-            }
-
-            .nav-bar {
-                flex-direction: column;
-            }
-
-            .menu-toggle {
-                display: block;
-            }
         }
     </style>
 
@@ -971,13 +946,15 @@
             descricaoCell.innerHTML = `<input type="text" value="${descricaoCell.textContent}">`;
 
             // Botões de ação
-            const editButton = document.querySelector(`#row-${id} button:nth-child(1)`);
-            const saveButton = document.querySelector(`#row-${id} button:nth-child(2)`);
-            const cancelButton = document.querySelector(`#row-${id} button:nth-child(3)`);
+            const editButton = document.querySelector(`#row-${id} .edit-btn`);
+            const saveButton = document.querySelector(`#row-${id} .save-btn`);
+            const cancelButton = document.querySelector(`#row-${id} .cancel-btn`);
+            const deleteButton = document.querySelector(`#row-${id} .delete-btn`);
 
-            editButton.style.display = "none";
-            saveButton.style.display = "inline-block";
-            cancelButton.style.display = "inline-block";
+            editButton.style.display = "none"; // Ocultar botão de edição
+            saveButton.style.display = "inline-block"; // Mostrar botão de salvar
+            cancelButton.style.display = "inline-block"; // Mostrar botão de cancelar
+            deleteButton.style.display = "none"; // Ocultar botão de exclusão
         }
 
         // Atualiza as opções de categoria ao editar uma transação
@@ -1768,7 +1745,7 @@
                     </div>
                     <div>
                         <div class="form-group">
-                            <label class="margin-tipo">Tipo:</label>
+                            <label>Tipo:</label>
                             <div>
                                 <label for="entrada">
                                     <input type="radio" id="entrada" name="tipo" value="Entrada"
@@ -1871,7 +1848,7 @@
                 <div>
                     <!-- Tipo -->
                     <div class="radio-spacing">
-                        <label class="margin-tipo">Tipo:</label>
+                        <label>Tipo:</label>
                         <label for="buscaEntrada">
                             <input type="checkbox" id="buscaEntrada" name="tipo" value="Entrada"> Entrada
                         </label>
